@@ -1,0 +1,151 @@
+<section class="panel">
+  <h2>Заказы</h2>
+
+  <div class="filters" role="group" aria-label="Фильтр по статусу" data-test="filters">
+    <button
+      type="button"
+      class="chip"
+      [class.active]="store.status() === null"
+      [attr.aria-pressed]="store.status() === null"
+      (click)="store.filterBy(null)"
+    >
+      Все
+      @if (store.counts()) {
+        <span class="count">{{ store.totalCount() }}</span>
+      }
+    </button>
+    @for (status of statuses; track status) {
+      <button
+        type="button"
+        class="chip"
+        [class.active]="store.status() === status"
+        [attr.aria-pressed]="store.status() === status"
+        [attr.data-status]="status"
+        (click)="store.filterBy(status)"
+      >
+        {{ statusLabels[status] }}
+        @if (store.counts(); as counts) {
+          <span class="count">{{ counts[status] }}</span>
+        }
+      </button>
+    }
+  </div>
+
+  @if (store.error(); as message) {
+    <div class="alert alert-error" role="alert" data-test="list-error">
+      {{ message }}
+      <button type="button" class="link" (click)="store.reload()">Повторить</button>
+    </div>
+  } @else if (store.page(); as page) {
+    @if (rows().length === 0) {
+      <p class="empty" data-test="empty">
+        @if (store.status(); as status) {
+          Заказов со статусом «{{ statusLabels[status] }}» нет.
+        } @else {
+          Заказов пока нет — нажмите «Загрузить заказы».
+        }
+      </p>
+    } @else {
+      <div class="orders" [class.stale]="store.loading()" data-test="orders">
+        <div class="orders-head" aria-hidden="true">
+          <span>Заказ</span><span>Покупатель</span><span>Доставка</span>
+          <span class="num">Товары</span><span class="num">Доставка</span
+          ><span class="num">Итого</span>
+        </div>
+        @for (row of rows(); track row.order.id) {
+          @let order = row.order;
+          <article class="order" data-test="order">
+            <div class="cell order-id">
+              <strong>{{ order.externalId }}</strong>
+              <span class="badge status-{{ order.status }}">{{ statusLabels[order.status] }}</span>
+              @if (order.needsReview) {
+                <span class="badge review">Нужна проверка</span>
+              }
+            </div>
+            <div class="cell">
+              {{ order.customer.name }}<br />
+              <a class="muted" [href]="'tel:' + order.customer.phone">{{
+                order.customer.phone | phone
+              }}</a>
+            </div>
+            <div class="cell">
+              @if (order.interval; as slot) {
+                {{ order.district | district }}, {{ order.address }}<br />
+                <span class="muted">{{ slot | deliverySlot }}</span>
+              } @else {
+                Самовывоз
+              }
+            </div>
+            <div class="cell num" data-label="Товары">{{ order.itemsTotal | money }}</div>
+            <div class="cell num" data-label="Доставка">
+              {{ order.delivery.cost | money }}
+              @if (row.urgent) {
+                <span class="badge urgent">срочно</span>
+              }
+            </div>
+            <div class="cell num total" data-label="Итого">{{ order.grandTotal | money }}</div>
+            @if (order.needsReview) {
+              <p class="cell review-text">{{ row.reviewText }}</p>
+            }
+            <details class="cell order-details" data-test="details">
+              <summary>Состав и расчёт</summary>
+              <ul class="lines">
+                @for (item of order.items; track $index) {
+                  <li>
+                    <span>
+                      {{ item.name }} × {{ item.qty }}
+                      @if (item.sku) {
+                        <span class="muted"> · {{ item.sku }}</span>
+                      }
+                    </span>
+                    <span>{{ item.lineTotal | money }}</span>
+                  </li>
+                }
+                @for (charge of order.delivery.breakdown; track charge.code) {
+                  <li class="muted">
+                    <span>{{ charge.label }}</span
+                    ><span>{{ charge.amount | money }}</span>
+                  </li>
+                } @empty {
+                  <li class="muted">
+                    <span>Самовывоз</span><span>{{ 0 | money }}</span>
+                  </li>
+                }
+                @if (row.declaredMismatch !== null) {
+                  <li class="muted">
+                    <span>Итог площадки (не используется)</span
+                    ><span>{{ row.declaredMismatch | money }}</span>
+                  </li>
+                }
+              </ul>
+            </details>
+          </article>
+        }
+      </div>
+
+      @if (store.pages() > 1) {
+        <nav class="pager" aria-label="Страницы">
+          <button
+            type="button"
+            class="btn"
+            [disabled]="store.pageNo() === 1"
+            (click)="store.goToPage(store.pageNo() - 1)"
+          >
+            ← Назад
+          </button>
+          <span>{{ store.pageNo() }} из {{ store.pages() }}</span>
+          <button
+            type="button"
+            class="btn"
+            [disabled]="store.pageNo() >= store.pages()"
+            (click)="store.goToPage(store.pageNo() + 1)"
+          >
+            Вперёд →
+          </button>
+        </nav>
+      }
+    }
+  } @else if (store.loading()) {
+    <p class="muted" data-test="loading">Загружаем заказы…</p>
+  }
+</section>

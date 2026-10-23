@@ -1,0 +1,24 @@
+:host {
+  display: block;
+}
+
+.top {
+  background: var(--primary);
+  color: #fff;
+  padding: 14px 16px;
+}
+
+.shop-name {
+  margin: 2px 0 0;
+  opacity: 0.85;
+  font-size: 0.85rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}

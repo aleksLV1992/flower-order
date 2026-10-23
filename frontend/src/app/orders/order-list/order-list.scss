@@ -1,0 +1,162 @@
+.filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.count {
+  opacity: 0.7;
+  margin-left: 2px;
+}
+
+.empty {
+  color: var(--muted);
+  padding: 24px 0;
+  text-align: center;
+}
+
+.orders {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  transition: opacity 0.15s;
+
+  &.stale {
+    opacity: 0.55;
+  }
+}
+
+.orders-head {
+  display: none;
+}
+
+.order {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px 10px;
+
+  > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .cell,
+  .order-details {
+    grid-column: 1 / -1;
+  }
+
+  .num {
+    grid-column: auto;
+    text-align: left;
+
+    &::before {
+      content: attr(data-label);
+      display: block;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+  }
+
+  .total {
+    font-weight: 700;
+  }
+
+  &:has(.status-cancelled) {
+    background: var(--bg);
+  }
+}
+
+.order-id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.review-text {
+  color: var(--warn);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.order-details summary {
+  cursor: pointer;
+  color: var(--primary);
+  font-size: 0.875rem;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.lines {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  font-size: 0.875rem;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 3px 0;
+    border-top: 1px dashed var(--border);
+  }
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  gap: 8px;
+}
+
+@media (min-width: 900px) {
+  .orders {
+    gap: 0;
+  }
+
+  .orders-head,
+  .order {
+    grid-template-columns: 1.3fr 1.4fr 2fr 0.8fr 0.9fr 0.9fr;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    padding: 10px 4px;
+  }
+
+  .orders-head {
+    display: grid;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .num {
+    text-align: right;
+  }
+
+  .order {
+    .cell {
+      grid-column: auto;
+    }
+
+    .num {
+      text-align: right;
+
+      &::before {
+        content: none;
+      }
+    }
+
+    .review-text,
+    .order-details {
+      grid-column: 1 / -1;
+    }
+  }
+}

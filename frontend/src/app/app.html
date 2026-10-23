@@ -1,0 +1,10 @@
+<header class="top">
+  <h1>Заказы маркетплейса</h1>
+  @if (orders.shopName(); as name) {
+    <p class="shop-name">{{ name }}</p>
+  }
+</header>
+<main class="container">
+  <app-import-panel />
+  <app-order-list />
+</main>

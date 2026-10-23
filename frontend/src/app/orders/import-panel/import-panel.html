@@ -1,0 +1,80 @@
+<section class="panel">
+  <button
+    type="button"
+    class="btn-primary"
+    (click)="run()"
+    [disabled]="loading()"
+    data-test="import"
+  >
+    @if (loading()) {
+      <span class="spinner" aria-hidden="true"></span> Загружаем…
+    } @else {
+      Загрузить заказы
+    }
+  </button>
+
+  @if (error(); as message) {
+    <div class="alert alert-error" role="alert" data-test="import-error">
+      {{ message }}
+      <button type="button" class="link" (click)="run()">Повторить</button>
+    </div>
+  }
+
+  @if (report(); as report) {
+    <div class="summary" data-test="summary" aria-live="polite">
+      <span class="summary-total">Обработано: {{ report.summary.total }}</span>
+      @for (outcome of outcomes; track outcome) {
+        @if (report.summary[outcome]) {
+          <button
+            type="button"
+            class="chip outcome-{{ outcome }}"
+            [class.active]="outcomeFilter() === outcome"
+            [attr.aria-pressed]="outcomeFilter() === outcome"
+            (click)="toggleFilter(outcome)"
+          >
+            {{ outcomeLabels[outcome] }}: {{ report.summary[outcome] }}
+          </button>
+        }
+      }
+    </div>
+
+    @if (visibleResults().length) {
+      <ul class="results" data-test="results">
+        @for (result of visibleResults(); track result.index) {
+          <li class="result outcome-{{ result.outcome }}">
+            <div class="result-head">
+              <strong>{{ result.externalId ?? 'Запись №' + (result.index + 1) }}</strong>
+              <span class="badge outcome-{{ result.outcome }}">{{
+                outcomeLabels[result.outcome]
+              }}</span>
+            </div>
+            @if (result.reason; as reason) {
+              <p class="result-reason">{{ reason.message }}</p>
+            }
+            @if (result.outcome === 'updated' && result.previousStatus && result.status) {
+              <p class="muted">
+                Статус: {{ statusLabels[result.previousStatus] }} →
+                {{ statusLabels[result.status] }}
+              </p>
+            }
+            @for (note of result.notes; track note.code) {
+              <p class="result-note">{{ note.message }}</p>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted" data-test="no-problems">Проблем нет — все заказы приняты.</p>
+    }
+
+    @if (hiddenCount() > 0) {
+      <button type="button" class="link show-all" (click)="showAll()" data-test="show-all">
+        Показать все ({{ report.summary.total }})
+      </button>
+    } @else if (outcomeFilter() === 'all') {
+      <button type="button" class="link show-all" (click)="showProblems()">
+        Только проблемные
+      </button>
+    }
+  }
+</section>
