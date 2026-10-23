@@ -1,0 +1,40 @@
+deptrac:
+  paths:
+    - ./src
+  layers:
+    - name: Domain
+      collectors:
+        - { type: classLike, value: '^App\\Domain\\.*' }
+    - name: Application
+      collectors:
+        - { type: classLike, value: '^App\\Application\\.*' }
+    - name: Infrastructure
+      collectors:
+        - { type: classLike, value: '^App\\Infrastructure\\.*' }
+    - name: UI
+      collectors:
+        - { type: classLike, value: '^App\\UI\\.*' }
+    - name: DoctrineCollections
+      collectors:
+        - { type: classLike, value: '^Doctrine\\Common\\Collections\\.*' }
+    - name: Doctrine
+      collectors:
+        - { type: classLike, value: '^Doctrine\\(ORM|DBAL|Persistence)\\.*' }
+    - name: ObjectMapper
+      collectors:
+        - { type: classLike, value: '^Symfony\\Component\\ObjectMapper\\.*' }
+    - name: Symfony
+      collectors:
+        - type: bool
+          must:
+            - { type: classLike, value: '^Symfony\\.*' }
+          must_not:
+            - { type: classLike, value: '^Symfony\\Component\\ObjectMapper\\.*' }
+    - name: Psr
+      collectors:
+        - { type: classLike, value: '^Psr\\.*' }
+  ruleset:
+    Domain: [DoctrineCollections]
+    Application: [Domain, Psr, ObjectMapper]
+    Infrastructure: [Domain, Application, Doctrine, Symfony, ObjectMapper]
+    UI: [Application, Symfony, Psr]

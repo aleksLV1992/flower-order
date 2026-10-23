@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
+
+parameters:
+    app.delivery.urgency_fee: 20000
+    app.delivery.urgency_window_minutes: 120
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Kernel.php'
+            - '../src/Domain/'
+
+    App\Domain\Delivery\DeliveryCalculator:
+        arguments:
+            $rules: !tagged_iterator app.delivery_rule
+
+    App\Domain\Delivery\Rule\DistrictBasePriceRule:
+        tags: [{ name: 'app.delivery_rule', priority: 100 }]
+
+    App\Domain\Delivery\Rule\UrgencySurchargeRule:
+        arguments:
+            $fee: '%app.delivery.urgency_fee%'
+            $windowMinutes: '%app.delivery.urgency_window_minutes%'
+        tags: [{ name: 'app.delivery_rule', priority: 50 }]
+
+    App\Domain\Order\OrderRepository: '@App\Infrastructure\Persistence\Doctrine\DoctrineOrderRepository'
+    App\Domain\Shop\ShopRepository: '@App\Infrastructure\Persistence\Doctrine\DoctrineShopRepository'
+    App\Domain\Delivery\TariffRepository: '@App\Infrastructure\Persistence\Doctrine\DoctrineTariffRepository'

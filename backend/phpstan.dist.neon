@@ -1,0 +1,20 @@
+parameters:
+    level: max
+    phpVersion: 80500
+    paths:
+        - src
+        - tests
+    tmpDir: var/phpstan
+    symfony:
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+    doctrine:
+        objectManagerLoader: tests/object-manager.php
+    strictRules:
+        dynamicCallOnStaticMethod: false
+    ignoreErrors:
+        -
+            identifiers: [offsetAccess.nonOffsetAccessible, cast.int, cast.string]
+            path: tests/Integration/*
+        -
+            message: '#^Parameter \#1 \$array of function array_column expects array, mixed given\.$#'
+            path: tests/Integration/*
