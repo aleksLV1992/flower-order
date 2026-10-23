@@ -1,0 +1,45 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: app
+      MYSQL_USER: app
+      MYSQL_PASSWORD: app
+    volumes:
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uapp", "-papp"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: "mysql://app:app@db:3306/app?serverVersion=8.4.0&charset=utf8mb4"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+  e2e:
+    build: ./e2e
+    profiles: [e2e]
+    depends_on:
+      - frontend
+    volumes:
+      - ./e2e/screenshots:/e2e/screenshots
+      - ./e2e/report:/e2e/report
+
+volumes:
+  db-data:
