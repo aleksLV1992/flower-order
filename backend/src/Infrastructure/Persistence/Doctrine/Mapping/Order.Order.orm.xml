@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="App\Domain\Order\Order" table="orders">
+        <indexes>
+            <index name="idx_order_shop_status_id" columns="shop_id,status,id"/>
+        </indexes>
+        <unique-constraints>
+            <unique-constraint name="uniq_order_shop_external" columns="shop_id,external_id"/>
+        </unique-constraints>
+        <id name="id" type="integer"><generator strategy="AUTO"/></id>
+        <field name="externalId" length="64">
+            <options>
+                <option name="collation">utf8mb4_bin</option>
+            </options>
+        </field>
+        <field name="status" length="16" enum-type="App\Domain\Order\OrderStatus"/>
+        <field name="customerName" length="255"/>
+        <field name="customerPhone" type="phone_number" length="12"/>
+        <field name="deliveryType" length="16" enum-type="App\Domain\Order\DeliveryType"/>
+        <field name="district" length="32" nullable="true"/>
+        <field name="address" length="500" nullable="true"/>
+        <field name="intervalStart" type="datetime_immutable" nullable="true"/>
+        <field name="intervalEnd" type="datetime_immutable" nullable="true"/>
+        <field name="placedAt" type="datetime_immutable" nullable="true"/>
+        <field name="itemsTotal" type="integer"/>
+        <field name="declaredTotal" type="integer" nullable="true"/>
+        <field name="needsReview" type="boolean"/>
+        <field name="reviewReasonRecords" column="review_reasons" type="json"/>
+        <field name="deliveryCost" type="integer"/>
+        <field name="deliveryChargeRecords" column="delivery_breakdown" type="json"/>
+        <field name="grandTotal" type="integer"/>
+        <field name="createdAt" type="datetime_immutable"/>
+        <field name="updatedAt" type="datetime_immutable"/>
+        <many-to-one field="shop" target-entity="App\Domain\Shop\Shop">
+            <join-column name="shop_id" nullable="false"/>
+        </many-to-one>
+        <one-to-many field="itemCollection" target-entity="App\Domain\Order\OrderItem" mapped-by="order">
+            <cascade><cascade-persist/></cascade>
+            <order-by><order-by-field name="position" direction="ASC"/></order-by>
+        </one-to-many>
+    </entity>
+</doctrine-mapping>
